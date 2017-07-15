@@ -1,19 +1,27 @@
-import dataModel.DataModel;
+
+
 
 public class Recommend {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
-		DataModel u1= new DataModel();
+	 
 		FilteringComponent fc = new FilteringComponent();
-		fc.setDataModel(u1);
-		System.out.println(u1.addRating(1, 1, (float) 2.1));
-		System.out.println(u1.addRating(4, 2, (float) 2.1));
-		System.out.println(u1.addRating(1, 3, (float) 2.0));
-		//System.out.println(u1.getUserAverageRatings());
-		System.out.println(fc.predictRating(1, 2));
+		//ProfileLearner pf = new ProfileLearner();
+		//DefaultDataLoader dl=new DefaultDataLoader();
+		//dl.loadData(dm);
+		//System.out.println(dm.toString());
+		//System.out.println(dm.getRating(5, 1));
+		//System.out.println(dm.getUsers());
+		//System.out.println(dm.getItems());
+		//System.out.println(Utilities101.getPastLikedItemsOfUsers(dm));
 		
-		System.out.println(u1.toString());
+		//System.out.println(pf.loadUserProfiles());
+		//fc.start();
+		
+		System.out.println(fc.recommendItems(5));
+		System.out.println(fc.recommendItems(5));
+		System.out.println(fc.predictRating(5,5));
 	}
 
 }

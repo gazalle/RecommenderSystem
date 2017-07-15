@@ -410,7 +410,7 @@ public class DataModel implements Serializable {
 	/**
 	 * searches for "dead" users, i.e., users for which no ratings exist.
 	 */
-	void removeDeadUsers(){
+	public void removeDeadUsers(){
 		Iterator<Entry<Integer, Set<Rating>>> iterator = ratingsPerUser.entrySet().iterator();
 		while(iterator.hasNext()){
 			Entry<Integer, Set<Rating>> userWithRatings = iterator.next();

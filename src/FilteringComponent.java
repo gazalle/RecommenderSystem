@@ -3,14 +3,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
 
 
 
 import dataModel.DataModel;
 import dataModel.DefaultDataLoader;
 import tools.Utilities101;
-import dataModel.Rating;
+
 
 
 public class FilteringComponent{
@@ -45,110 +45,6 @@ public class FilteringComponent{
 	 boolean hideKnownItems = true;	
 	// Prepare a list for the results
 	Map<Integer, Double> similarities = new HashMap<Integer, Double>();
-	
-				
-	// =====================================================================================
-	/**
-	 * @throws Exception 
-	 * The algorithm searches for the n most similar items of the given item and combines the ratings
-	 * the prediction is a weighted combination of the neighbor ratings.
-	 */
-	public float predictRating(int user, int item) throws Exception {
-		
-		DataModel dataModel=new DataModel();
-		DefaultDataLoader dl=new DefaultDataLoader();
-		dl.loadData(dataModel);
-		
-		// Remember the item averages
-		itemAverages = Utilities101.getItemAverageRatings(dataModel.getRatings());
-		// Remember the user averages as default for the prediction
-		userAverages = dataModel.getUserAverageRatings();
-		// load the word list
-		wordlist = Utilities101.loadwordlist(dataDirectory + "/" + wordListFile);
-		// load feature vectors
-		featureWeights = Utilities101.loadFeatureWeights(dataDirectory + "/" + featureWeightFile);
-		//create cosine similarities
-		Utilities101.createCosineSimilaritiesFile(dataDirectory, featureWeights, wordlist, 1);
-		//load cosine similarities
-		cosineSimilarities = Utilities101.loadCosineSimilarities(dataDirectory + "/" + cosineSimilaritiesFile);
-		
-		
-		// We can do nothing about this user
-		// The item default might be a fallback
-		Float userAvg = this.userAverages.get(user);
-	
-		if (userAvg == null) {
-			Float itemAVG = this.itemAverages.get(item);
-			if (itemAVG != null) {
-				System.out.println("Returning item average");
-				return itemAVG;
-			}
-			else {
-				System.out.println("No user and item average available");
-				return Float.NaN;
-			}
-		}
-		
-		// go through all the items for which we have ratings
-		Set<Rating> ratedItems = dataModel.getRatingsPerUser().get(user);
-		// Default, if we have no data
-		if (ratedItems.size() == 0) {
-			return userAvg;
-		}
-		
-		// Store the similarities
-		double similarity = 0;
-		int keySmaller;
-		int keyGreater;
-		for (Rating r : ratedItems) {
-			
-			// get the cosine similarity of the current pair if possible
-			keySmaller = Math.min(item, r.item);
-			keyGreater = Math.max(item, r.item);
-			if ((cosineSimilarities.get(keySmaller) != null) && (cosineSimilarities.get(keySmaller).get(keyGreater) != null)) {
-				similarity = cosineSimilarities.get(keySmaller).get(keyGreater);
-			} else {
-				similarity = Double.NaN;
-			}
-			
-			if (Double.isNaN(similarity)) {
-				similarity = 0.0;
-			}
-			similarities.put(r.item, similarity);
-		}
-		
-		similarities = Utilities101.sortByValueDescending(similarities);
-	    //System.out.println("Similarities: " + similarities);
-		
-		double existingRatingsSum = 0;
-		int counter = 0;
-		double weightSum = 0;
-		double similarityWeight = 0;
-		double ratingSum = 0;
-		for (Integer otherItem : similarities.keySet()) {
-        //System.out.println("Using for prediction " + otherItem + ", user rating was: " + dataModel.getRating(user, otherItem));
-		// remember the weight
-		similarityWeight = similarities.get(otherItem);
-		if (similarityWeight > this.simThresholdForPrediction) {
-		weightSum += similarityWeight;
-		// add up the differences of the user average
-		ratingSum = (dataModel.getRating(user, otherItem) - userAvg) * similarityWeight;
-		//System.out.println("existing rating was: " + dataModel.getRating(user, otherItem));
-		existingRatingsSum += ratingSum;
-		counter++;}
-		if (nbNeighborsForPrediction > 0 && counter >= nbNeighborsForPrediction)  {
-			break;
-		}
-		}
-		
-		int nbToDivide = Math.min(counter, similarities.keySet().size());
-		if (nbToDivide == 0) {
-		System.out.println("No neighbors found with ratings ..");}
-		
-		float result = (float) existingRatingsSum / (float) weightSum;
-		result += userAvg;
-        return result;
-	}
 	
 	// =====================================================================================
 		/**

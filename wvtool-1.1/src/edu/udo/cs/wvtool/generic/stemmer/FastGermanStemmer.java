@@ -23,7 +23,7 @@
 */
 package edu.udo.cs.wvtool.generic.stemmer;
 
-import edu.udo.cs.wvtool.external.GermanStemmer;
+import edu.udo.cs.wvtool.external.englishStemmer;
 
 /**
  * Wrapper class for the external german stemmer.
@@ -34,7 +34,7 @@ import edu.udo.cs.wvtool.external.GermanStemmer;
  */
 public class FastGermanStemmer extends AbstractStemmer {
 
-    GermanStemmer stemmer = new GermanStemmer();
+    englishStemmer stemmer = new englishStemmer();
 
     public String getBase(String s) {
         return stemmer.stem(s);

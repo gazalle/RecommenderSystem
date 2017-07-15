@@ -11,7 +11,6 @@ import java.util.Set;
 import edu.udo.cs.wvtool.config.WVTConfiguration;
 import edu.udo.cs.wvtool.config.WVTConfigurationFact;
 import edu.udo.cs.wvtool.generic.output.WordVectorWriter;
-import edu.udo.cs.wvtool.generic.stemmer.FastGermanStemmer;
 import edu.udo.cs.wvtool.generic.stemmer.PorterStemmerWrapper;
 import edu.udo.cs.wvtool.generic.vectorcreation.TFIDF;
 import edu.udo.cs.wvtool.main.WVTDocumentInfo;
@@ -29,50 +28,38 @@ public class ContentAnalyzer {
 	public static String TF_IDF_FILENAME = "tf-idf-vectors.txt";
 	public static String WORDLIST_FILENAME = "wordlist.txt";
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		try {
-			System.out.println("Starting data preparation for ML data set with content information");
-			ContentAnalyzer preparator = new ContentAnalyzer();
-			preparator.run();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("Data preparation completed");
-	}
 	public void run() throws Exception {	
 		// get the correct product ids
 		Set<Integer> relevantProductIDs = getIDsOfProductsWithContentInfo(TARGET_DIRECTORY + PRODUCT_INFO);
 		// create the ratings file from the given one and remove products without content info
 		removeRatingsOfProductsWithoutContentInfo(TARGET_DIRECTORY, ORDER_FILE, relevantProductIDs, USER_INFO);
-		System.out.println("Extracted relevant ratings from data file to " + USER_INFO);
+		//System.out.println("Extracted relevant ratings from data file to " + USER_INFO);
 		// create the tf-idf vectors
-		System.out.println("Creating TF-IDF vectors from content information, creating temporary files");
+		//System.out.println("Creating TF-IDF vectors from content information, creating temporary files");
 		Set<String> filenames = runFileSplitter(TARGET_DIRECTORY, PRODUCT_INFO, TMP_DIRECTORY);
-		System.out.println("Creating output files containing tfidf vectors and wordlists");
-		generateWordVectorsAndWordList(filenames,TMP_DIRECTORY,WORDLIST_FILENAME,TF_IDF_FILENAME, TARGET_DIRECTORY, 20,1000,true,"german");
-		System.out.println("Created tf-idf vectors");
+		//System.out.println("Creating output files containing tfidf vectors and wordlists");
+		generateWordVectorsAndWordList(filenames,TMP_DIRECTORY,WORDLIST_FILENAME,TF_IDF_FILENAME, TARGET_DIRECTORY, 2,100,"english");
+		//System.out.println("Created tf-idf vectors");
 	}
 	/**
 	 * A method that creates a new ratings file and removes all lines that contain irrelevant product ids
 	 */
 	void removeRatingsOfProductsWithoutContentInfo(String targetDirectory, String targetFile, Set<Integer> relevantProductIDs, String resultFile) 
 			throws Exception {
-		System.out.println("Extracting ratings with content information");
+		//System.out.println("Extracting ratings with content information");
 		BufferedReader reader = new BufferedReader(new FileReader(targetDirectory + targetFile));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(targetDirectory + resultFile));
 		String line;
 		String[] tokens;
 		line = reader.readLine();
 		int cnt = 0;
-		int movieId;
+		int productId;
 		double rating = 0;
 		int newRating = 0;
 		while (line != null) {
 			tokens = line.split("::");
-			movieId = Integer.parseInt(tokens[1]);
-			if (relevantProductIDs.contains(movieId)) {
+			productId = Integer.parseInt(tokens[1]);
+			if (relevantProductIDs.contains(productId)) {
 				rating = Double.parseDouble(tokens[2]);
 				// rounding..
 				newRating = (int) Math.ceil(rating);
@@ -82,14 +69,14 @@ public class ContentAnalyzer {
 			}
 			line = reader.readLine();
 		}
-		System.out.println("Wrote " + cnt + " ratings to target file " + resultFile);
+		//System.out.println("Wrote " + cnt + " ratings to target file " + resultFile);
 		reader.close();
 		writer.close();
 	}
 
 	
 	/**
-	 * A method that extracts the IDs of movies for which we have content information
+	 * A method that extracts the IDs of products for which we have content information
 	 * @param filename
 	 * @return
 	 */
@@ -106,14 +93,14 @@ public class ContentAnalyzer {
 			line = reader.readLine();
 		}
 		reader.close();
-		System.out.println("Extracted " + result.size() + " relevant items from content file");
+		//System.out.println("Extracted " + result.size() + " relevant items from content file");
 		return result;
 	}
 	
 	
-	// Reads the file and generates one input file per entry in our directory. Use movie-IDs as file names
+	// Reads the file and generates one input file per entry in our directory. Use product-IDs as file names
 	/**
-	 * Splits the given content file into individual files based on the movie id for a later use
+	 * Splits the given content file into individual files based on the product id for a later use
 	 * for the word vector tool
 	 * @param contentDirectory the directory of the source file
 	 * @param contentFileName the content file
@@ -123,10 +110,10 @@ public class ContentAnalyzer {
 	 */
 	public static Set<String> runFileSplitter(String contentDirectory, String contentFileName, String outputDirectory) throws Exception{
 		
-		System.out.println("OUTPUTDIR = " + outputDirectory);
+		//System.out.println("OUTPUTDIR = " + outputDirectory);
 		// We know where the file is: 
 		String inputFile = contentDirectory + contentFileName;
-		System.out.println("Splitting the file: " + inputFile);
+		//System.out.println("Splitting the file: " + inputFile);
 
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		
@@ -185,7 +172,6 @@ public class ContentAnalyzer {
 														String outputDirectory,
 														int minFrequency,
 														int maxFrequency,
-														boolean useStemming,
 														String language
 														) throws Exception {
 
@@ -200,20 +186,14 @@ public class ContentAnalyzer {
 				cnt++;
 			}
 			
-			System.out.println("Processed " + cnt + " files");
+			//System.out.println("Processed " + cnt + " files");
 			
 			
 			// Stemming
 			WVTConfiguration config = new WVTConfiguration();
+			config.setConfigurationRule(WVTConfiguration.STEP_STEMMER, new WVTConfigurationFact(new PorterStemmerWrapper()));
+				
 			
-			if (useStemming) {
-				if ("german".equals(language)) {
-					config.setConfigurationRule(WVTConfiguration.STEP_STEMMER, new WVTConfigurationFact(new FastGermanStemmer()));
-				}
-				else {
-					config.setConfigurationRule(WVTConfiguration.STEP_STEMMER, new WVTConfigurationFact(new PorterStemmerWrapper()));
-				}
-			}
 			
 			// create the word list
 			WVTWordList wordList = wvt.createWordList(list, config);
@@ -226,7 +206,7 @@ public class ContentAnalyzer {
 			
 			// Also the outputs
 			String tempFile = contentDirectory + tfidfFileName + ".temp";
-			System.out.println("Trying to write to " + tempFile);
+			//System.out.println("Trying to write to " + tempFile);
 			
 			FileWriter fileWriter = new FileWriter(tempFile);
 			WordVectorWriter wvw = new WordVectorWriter(fileWriter, true);

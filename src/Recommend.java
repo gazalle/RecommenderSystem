@@ -1,5 +1,5 @@
-
-
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Recommend {
 
@@ -7,21 +7,41 @@ public class Recommend {
 		// TODO Auto-generated method stub
 	 
 		FilteringComponent fc = new FilteringComponent();
-		//ProfileLearner pf = new ProfileLearner();
-		//DefaultDataLoader dl=new DefaultDataLoader();
-		//dl.loadData(dm);
-		//System.out.println(dm.toString());
-		//System.out.println(dm.getRating(5, 1));
-		//System.out.println(dm.getUsers());
-		//System.out.println(dm.getItems());
-		//System.out.println(Utilities101.getPastLikedItemsOfUsers(dm));
 		
-		//System.out.println(pf.loadUserProfiles());
-		//fc.start();
-		
-		System.out.println(fc.recommendItems(5));
-		System.out.println(fc.recommendItems(5));
-		System.out.println(fc.predictRating(5,5));
+	     try {
+			//System.out.println("Starting data preparation for ML data set with content information");
+			ContentAnalyzer preparator = new ContentAnalyzer();
+			preparator.run();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		ArrayList al = new ArrayList();
+		Random random=new Random();
+		int r;
+		r=random.nextInt(8);
+		al.addAll(fc.recommendItems(r+1));
+        for(int i=0;i<al.size();i++){
+        	int item=(int) al.get(i);
+        	 if(item == 17){
+        	System.out.println("item 17");
+              }
+        	  if(item == 20){
+                	System.out.println("item 20"); 
+              }
+            
+              if(item == 13){
+            	  System.out.println("item 13");
+              }
+            
+              if(item == 15){
+            	  System.out.println("item 15");
+              }
+              
+             if(item == 8){
+            	 System.out.println("item 8");
+              }
+        }
 	}
 
 }

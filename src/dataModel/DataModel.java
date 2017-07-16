@@ -5,21 +5,18 @@ import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
+import dataModel.Rating;
 import tools.Utilities101;
 
 /**
  * This class holds all the data required for the recommendation process.
- * @author DJ
  *
  */
 @SuppressWarnings("serial")
@@ -40,10 +37,6 @@ public class DataModel implements Serializable {
 	// boolean indicating if averages are "dirty"
 	boolean averagesDirty = false;
 
-	// A generic pointer to add-on information as key-value pairs
-	// Can be set by specific data loaders and recommenders
-	Map<Object, Object> extraInformation = new Object2ObjectOpenHashMap<Object, Object>();
-	
 	/**
 	 * A map that contains the user averages. We initialize it on first use and 
 	 * a call to getUserAverageRating() or to getUserAverageRatings();
@@ -160,72 +153,8 @@ public class DataModel implements Serializable {
 		}
 		return  userAverageRatings;
 	}
-	
 
-	// =====================================================================================
 
-	/**
-	 * The constructor
-	 */
-	public DataModel() {
-		extraInformation = new Object2ObjectOpenHashMap<Object, Object>();
-	}
-
-	// =====================================================================================
-
-	/**
-	 * A copy constructor. Has to be overwritten in case we have extra info
-	 * @param dm
-	 */
-	public DataModel(DataModel dm)  {
-		// Copy things
-		this.ratings = new ObjectOpenHashSet<Rating>(dm.getRatings());
-		this.ratingsPerUser = new Int2ObjectOpenHashMap<Set<Rating>>();
-		for (Integer i : dm.ratingsPerUser.keySet()) {
-			this.ratingsPerUser.put(i, new ObjectOpenHashSet<Rating>(dm.ratingsPerUser.get(i)));
-		}
-		this.users = new IntOpenHashSet(dm.users);
-		this.items = new IntOpenHashSet(dm.items);
-		// This should not be a pointer?
-		this.extraInformation = new Object2ObjectOpenHashMap<Object, Object>(dm.extraInformation);
-		this.minRatingValue = dm.minRatingValue;
-		this.maxRatingValue = dm.maxRatingValue;
-	}
-
-	// =====================================================================================
-	
-	/**
-	 * Copies the data model but instead of calling {@link #addRating(Rating)} over and over,
-	 * the ratings are added in one go. That way the hash map is created much faster, because
-	 * no re-hashing is needed.
-	 * @param trainingData
-	 * @param extraInformationMap if not needed, can be null
-	 * @param minRatingValue if not needed, can be 0
-	 * @param maxRatingValue if not needed, can be 0
-	 */
-	public DataModel(Set<Rating> trainingData,
-			Map<Object, Object> extraInformationMap, float minRatingValue, float maxRatingValue) {
-		if(extraInformationMap!=null){
-			this.extraInformation = extraInformationMap;
-		}
-		this.minRatingValue = minRatingValue;
-		this.maxRatingValue = maxRatingValue;
-		this.ratings = new ObjectOpenHashSet<Rating>(trainingData);
-		this.ratingsPerUser = new Int2ObjectOpenHashMap<Set<Rating>>();
-		for (Rating rating : ratings) {
-			Set<Rating> userRatings = ratingsPerUser.get(rating.user);
-			if (userRatings == null) {
-				userRatings = new ObjectOpenHashSet<Rating>();
-			}
-			ratingsPerUser.put(rating.user, userRatings);
-			userRatings.add(rating);
-			users.add(rating.user);
-			items.add(rating.item);
-			averagesDirty = true;
-		}
-		recalculateUserAverages();
-	}
-	
 	// =====================================================================================
 
 	/**
@@ -246,55 +175,6 @@ public class DataModel implements Serializable {
 			}
 		}
 		return result;
-	}
-	
-	/*
-	 * Returns the rating object for a given user/item pair
-	 * returns null, if no such rating exists
-	 */
-	
-	public Rating getRatingObject(int user, int item) {
-		Set<Rating> userRatings = ratingsPerUser.get(user);
-		if (userRatings != null) {
-			// implementation to be improved
-			for (Rating r : userRatings) {
-				if (r.user == user && r.item == item) {
-					return r;
-				}
-			}
-		}
-		return null;
-	}
-
-	
-	// =====================================================================================
-
-	/**
-	 * Returns the handle to the extra info
-	 * @return a point to application specific objects for a given key
-	 */
-	public Object getExtraInformation(Object key) {
-		return extraInformation.get(key);
-	}
-
-
-	// =====================================================================================
-
-	/**
-	 * Sets a handle to the extra info
-	 * @param extraInformation
-	 */
-	public void addExtraInformation(Object key, Object value) {
-		this.extraInformation.put(key, value);
-	}
-	
-	
-	/**
-	 * Get the whole map at once.
-	 * @return the internal map
-	 */
-	public Map<Object, Object> getExtraInformationMap() {
-		return this.extraInformation;
 	}
 
 	// =====================================================================================
@@ -327,23 +207,6 @@ public class DataModel implements Serializable {
 		return ratings;
 	}
 
-	// =====================================================================================
-
-	/**
-	 * Creates a new data model from a given set of ratings. Removes all ratings which are not in the 
-	 * provided set
-	 * @param ratings
-	 * @return
-	 */
-	public static DataModel copyDataModelAndRemoveRatings(DataModel dm, Set<Rating> ratings2remove) {
-		DataModel result = new DataModel(dm);
-		for (Rating r : ratings2remove) {
-			result.removeRating(r);
-		}
-		dm.recalculateUserAverages();
-		return result;
-	}
-	
 	// =====================================================================================
 	
 	/**
@@ -382,18 +245,6 @@ public class DataModel implements Serializable {
 		this.ratingsPerUser.remove(user);
 		this.users.remove(user);
 	}
-
-	// =====================================================================================
-	// Debug -> get the extra info object
-	/**
-	 * @deprecated
-	 * use the other method
-	 * @return extra information map of datamodel
-	 */
-	@Deprecated
-	public Map<Object, Object> getAllExtraInfos() {
-		return getExtraInformationMap();
-	}
 	
 	
 	// =====================================================================================
@@ -405,43 +256,6 @@ public class DataModel implements Serializable {
 	public void recalculateUserAverages() {
 		this.userAverageRatings = Utilities101.getUserAverageRatings(this.ratings);
 		averagesDirty = false;
-	}
-	
-	/**
-	 * searches for "dead" users, i.e., users for which no ratings exist.
-	 */
-	public void removeDeadUsers(){
-		Iterator<Entry<Integer, Set<Rating>>> iterator = ratingsPerUser.entrySet().iterator();
-		while(iterator.hasNext()){
-			Entry<Integer, Set<Rating>> userWithRatings = iterator.next();
-			if(userWithRatings.getValue().size()==0){
-				if(users.contains(userWithRatings.getKey())){
-					users.remove(userWithRatings.getKey());
-				}
-				iterator.remove();
-			}
-		}
-	}
-	
-	/**
-	 * Returns an unmodifiable instance of this data model, i.e., 
-	 * an instance in which the sets of ratings, users, ... cannot be changed (neither added to nor removed from).
-	 * Note however, that rating values themselves may be changed.
-	 * @return
-	 */
-	public DataModel unmodifiable(){
-		DataModel dm = new DataModel();
-		dm.averagesDirty = averagesDirty;
-		dm.extraInformation = Collections.unmodifiableMap(extraInformation);
-		dm.items = Collections.unmodifiableSet(items);
-		dm.maxRatingValue = maxRatingValue;
-		dm.minRatingValue = minRatingValue;
-		dm.ratings = Collections.unmodifiableSet(ratings);
-		dm.ratingsPerUser = Collections.unmodifiableMap(ratingsPerUser);
-		dm.splitNumber = splitNumber;
-		dm.userAverageRatings = Collections.unmodifiableMap(userAverageRatings);
-		dm.users = Collections.unmodifiableSet(users);
-		return dm;
 	}
 	
 	// =====================================================================================

@@ -4,11 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
-
 import dataModel.DataModel;
-import dataModel.DefaultDataLoader;
+import dataModel.DataLoader;
 import tools.Utilities101;
 
 
@@ -27,21 +24,9 @@ public class FilteringComponent{
 	List<String> wordlist;
     // The weights per word of a game: maps product IDs to a map of word-id and weights
 	Map<Integer, Map<Integer, Double>> featureWeights;
-	// The cosine similarities of each item pair
-	Map<Integer, Map<Integer, Double>> cosineSimilarities;
-	// The average profile vector per user
+	 // A map where we store what a user has liked in the past
 	Map<Integer, Map<Integer, Double>> userProfiles;
-    // A map where we store what a user has liked in the past
-	
-	// Remember the user averages for the prediction task
-	Map<Integer, Float> userAverages;
-	// Remember the item averages for the prediction task
-	Map<Integer, Float> itemAverages;
-
-	// How many neighbors should be used for the rating prediction
-	int nbNeighborsForPrediction = 3;
-	double simThresholdForPrediction = 0.0;
-	//default is true for legacy reasons
+    //default is true for legacy reasons
 	 boolean hideKnownItems = true;	
 	// Prepare a list for the results
 	Map<Integer, Double> similarities = new HashMap<Integer, Double>();
@@ -56,7 +41,7 @@ public class FilteringComponent{
 		public List<Integer> recommendItems(int user) throws Exception {
 			
 			DataModel dataModel=new DataModel();
-			DefaultDataLoader dl=new DefaultDataLoader();
+			DataLoader dl=new DataLoader();
 			dl.loadData(dataModel);
 			
 			// load the word list
@@ -70,6 +55,7 @@ public class FilteringComponent{
 			
 			// Get the profile
 			Map<Integer, Double> userProfile = this.userProfiles.get(user);
+			
 			if (userProfile == null) {
 			System.out.println("No PROFILE for user " + user + " - returning empty list");
 			return result; }
@@ -96,7 +82,9 @@ public class FilteringComponent{
 					similarity = Utilities101.cosineSimilarity(userProfile, featureVector, this.wordlist);
 					if (Double.isNaN(similarity)) {
 						similarity = 0.0;}
-					similarities.put(item, similarity);} }
+					similarities.put(item, similarity);
+					
+					} }
 			
 			// Once we have the similarities, we sort them in descending order and return them
 			Map<Integer, Double> sortedMap = Utilities101.sortByValueDescending(similarities);

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import dataModel.DataModel;
-import dataModel.DefaultDataLoader;
+import dataModel.DataLoader;
 import tools.Utilities101;
 
 
@@ -30,6 +30,8 @@ public class ProfileLearner{
 	
 		List<Map<Integer, Double>> vectorsOfLikedItems = new ArrayList<Map<Integer, Double>>(); 
 		Map<Integer, Double> weightvector=new HashMap<Integer, Double>();
+		
+	
 	
 	// =====================================================================================			
 			
@@ -43,7 +45,7 @@ public class ProfileLearner{
 Map<Integer, Map<Integer, Double>> loadUserProfiles() throws Exception {
 	
 	DataModel dm=new DataModel();
-	DefaultDataLoader dl=new DefaultDataLoader();
+	DataLoader dl=new DataLoader();
 	dl.loadData(dm);
 	
 	Map<Integer,Map<Integer, Double>> result = new HashMap<Integer, Map<Integer, Double>>();

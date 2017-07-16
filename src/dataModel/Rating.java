@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 /**
  * A class to store ratings
- * @author DJ
  *
  */
 @SuppressWarnings("serial")
@@ -26,7 +25,7 @@ public class Rating implements Serializable {
 	
 	/** String representation of rating */
 	public String toString() {
-		return "[Rating: u: " + this.user + " i: " + this.item + " v: " + this.rating + "]";  
+		return ""+this.item+ "";  
 	}
 	
 	/**
@@ -47,19 +46,6 @@ public class Rating implements Serializable {
 		else {
 			return false;
 		}
-	}
-	
-	/**
-	 * Hashcode calculation based on the equals definition.
-	 */
-	@Override
-	public int hashCode() {
-		int hashCode = 11;
-		int prime1 = 19;
-		int prime2 = 29;
-		hashCode += prime1 * this.item;
-		hashCode += prime2 * this.user;
-		return hashCode;
 	}
 	
 }

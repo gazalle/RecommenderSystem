@@ -21,7 +21,7 @@ import edu.udo.cs.wvtool.wordlist.WVTWordList;
 public class ContentAnalyzer {
 	
 	public static String TARGET_DIRECTORY = "data/shopProducts/";
-	public static String ORDER_FILE = "ShopData/orders.dat";
+	public static String ORDER_FILE = "orders.dat";
 	public static String USER_INFO = "ProductOrders.txt";
 	public static String PRODUCT_INFO = "ProductDescription.txt";
 	public static String TMP_DIRECTORY = TARGET_DIRECTORY + "tmp";

@@ -7,10 +7,10 @@ import java.io.FileReader;
 import java.util.Set;
 
 /**
- * A default data loader capable of loading shop files
+ * A data loader capable of loading shop files
  * Format: user<tab>item<tab>order<tab>timestamp
  */
-public class DefaultDataLoader  {
+public class DataLoader  {
 
 	// A default location
 	protected String filename = "data/shopProducts/ProductOrders.txt";
@@ -30,13 +30,12 @@ public class DefaultDataLoader  {
 	/**
 	 * An empty constructor
 	 */
-	public DefaultDataLoader() {
+	public DataLoader() {
 	}	
 	// =====================================================================================
 
 	/**
 	 * The method loads the Shop data from the specified file location.
-	 * The method can be overwritten in a subclass
 	 */
 	public void loadData(DataModel dm) throws Exception {
 		int counter = 0;
@@ -56,7 +55,6 @@ public class DefaultDataLoader  {
 			dm.addRating(Integer.parseInt(tokens[0]), Integer.parseInt(tokens[1]), Float.parseFloat(tokens[2]));
 			line = reader.readLine();
 			counter++;
-//			// debugging here..
 			if (maxLines != -1) {
 				if (counter >= maxLines) {
 					System.out.println("DataLoader: Stopping after " + (counter)  + " lines for debug");

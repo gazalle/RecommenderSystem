@@ -33,11 +33,6 @@ import dataModel.Rating;
  * Various helpers 
  */
 public class Utilities101 {
-
-	public static float PREDICTION_RELEVANCE_MIN_RATING_FOR_RELEVANCE = -1;
-	public static int PREDICTION_RELEVANCE_MIN_PERCENTAGE_ABOVE_AVERAGE = 0;
-	public static float MIN_RATING = 1;
-	public static float MAX_RATING = 5;
 	
 	public static Map<Integer, Integer> calculateRatingsPerItem(DataModel dm) {
 		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
